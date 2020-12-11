@@ -1,0 +1,24 @@
+kind: pipeline
+type: docker
+name: default
+
+steps:
+    - name: format-lint
+      image: golang
+      commands:
+        - go get -u golang.org/x/lint/golint
+        - gofmt -d .
+        - golint -set_exit_status ./...
+
+    - name: test
+      image: golang
+      volumes:
+        - name: deps
+          path: /go
+      commands:
+        - go get -d ./...
+        - go test ./...
+
+volumes:
+    - name: deps
+      temp: {}
