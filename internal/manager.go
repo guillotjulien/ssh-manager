@@ -68,7 +68,7 @@ func (m Manager) GetIdentity(name string) (identity Identity, err error) {
 
 // AddIdentity adds a new identity to the configuration file. In case an identity
 // with the same name already exists, an error will be returned.
-func (m *Manager) AddIdentity(name, address, description string) error {
+func (m *Manager) AddIdentity(name, username, address, description string) error {
 	var existingIdentity Identity
 
 	// We first check if the file is here and the format is okay
@@ -91,6 +91,7 @@ func (m *Manager) AddIdentity(name, address, description string) error {
 
 	m.identities = append(m.identities, Identity{
 		name,
+		username,
 		address,
 		description,
 	})
