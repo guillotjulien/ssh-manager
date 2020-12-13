@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"os/exec"
+	"os/user"
 	"sort"
+	"strconv"
 
 	"github.com/manifoldco/promptui"
 	"github.com/ssh-manager/internal"
@@ -13,8 +14,12 @@ import (
 )
 
 func main() {
-	homeDirectory := os.Getenv("HOME")
-	manager, err := internal.Manager{}.New(fmt.Sprintf("%s/.ssh-manager.json", homeDirectory))
+	usr, err := user.Current()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	manager, err := internal.Manager{}.New(fmt.Sprintf("%s/.ssh-manager.json", usr.HomeDir))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -64,6 +69,20 @@ func main() {
 					}
 
 					prompt = promptui.Prompt{
+						Label: "Port",
+					}
+
+					port, err := prompt.Run()
+					if err != nil {
+						return err
+					}
+
+					intPort, err := strconv.Atoi(port)
+					if err != nil {
+						return err
+					}
+
+					prompt = promptui.Prompt{
 						Label: "Description",
 					}
 
@@ -72,7 +91,7 @@ func main() {
 						return err
 					}
 
-					manager.AddIdentity(name, username, address, description)
+					manager.AddIdentity(name, username, address, description, intPort)
 
 					return nil
 				},
@@ -103,23 +122,15 @@ func main() {
 						return listIdentities(manager)
 					}
 
-					prompt := promptui.Prompt{
-						Label: "Password",
-						Mask:  '*',
-					}
-
-					password, err := prompt.Run()
-					if err != nil {
-						return err
-					}
-
 					identity, err := manager.GetIdentity(c.Args().Get(0))
 					if err != nil {
 						return err
 					}
 
-					exec.Command("clear")
-					identity.Connect(password)
+					err = identity.Connect()
+					if err != nil {
+						log.Fatal(err)
+					}
 
 					return nil
 				},
@@ -154,6 +165,7 @@ func listIdentities(manager internal.Manager) error {
 		fmt.Println("Name:", identity.Name)
 		fmt.Println("Username:", identity.Username)
 		fmt.Println("Address:", identity.Address)
+		fmt.Println("Port:", identity.Port)
 		fmt.Println("Description:", identity.Description)
 	}
 

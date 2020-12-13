@@ -58,8 +58,8 @@ func TestGetIdentities(t *testing.T) {
 		defer os.Remove(path)
 
 		want := []Identity{
-			{"a", "username a", "1.1.1.1", "description a"},
-			{"b", "username b", "2.2.2.2", "description b"},
+			{"a", "username a", "1.1.1.1", 1, "description a"},
+			{"b", "username b", "2.2.2.2", 1, "description b"},
 		}
 
 		data, _ := json.Marshal(configuration{want})
@@ -111,7 +111,7 @@ func TestGetIdentity(t *testing.T) {
 
 		manager, _ := Manager{}.New(path)
 
-		want := Identity{"test", "username", "1.1.1.1", "description"}
+		want := Identity{"test", "username", "1.1.1.1", 1, "description"}
 		identities := []Identity{want}
 
 		data, _ := json.Marshal(configuration{identities})
@@ -166,9 +166,9 @@ func TestAddIdentity(t *testing.T) {
 		defer os.Remove(path)
 
 		manager, _ := Manager{}.New(path)
-		manager.AddIdentity("test", "username", "1.1.1.1", "description")
+		manager.AddIdentity("test", "username", "1.1.1.1", "description", 1)
 
-		want := []Identity{{"test", "username", "1.1.1.1", "description"}}
+		want := []Identity{{"test", "username", "1.1.1.1", 1, "description"}}
 		if err := manager.read(path); err != nil {
 			t.Error(err)
 		}
@@ -183,9 +183,9 @@ func TestAddIdentity(t *testing.T) {
 		defer os.Remove(path)
 
 		manager, _ := Manager{}.New(path)
-		manager.AddIdentity("test", "username", "1.1.1.1", "description")
+		manager.AddIdentity("test", "username", "1.1.1.1", "description", 1)
 
-		if err := manager.AddIdentity("test", "username", "1.1.1.1", "description"); err == nil {
+		if err := manager.AddIdentity("test", "username", "1.1.1.1", "description", 1); err == nil {
 			t.Error("Expected error to be returned, got nil")
 		}
 	})
@@ -200,7 +200,7 @@ func TestAddIdentity(t *testing.T) {
 
 		manager := Manager{path, nil}
 
-		if err := manager.AddIdentity("test", "username", "1.1.1.1", "description"); err == nil {
+		if err := manager.AddIdentity("test", "username", "1.1.1.1", "description", 1); err == nil {
 			t.Error("Expected error to be returned, got nil")
 		}
 	})
@@ -212,7 +212,7 @@ func TestRemoveIdentity(t *testing.T) {
 		defer os.Remove(path)
 
 		manager, _ := Manager{}.New(path)
-		manager.AddIdentity("test", "username", "1.1.1.1", "description")
+		manager.AddIdentity("test", "username", "1.1.1.1", "description", 1)
 
 		err := manager.RemoveIdentity("test")
 		if err != nil {
